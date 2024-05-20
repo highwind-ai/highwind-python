@@ -1,5 +1,5 @@
 [tool.poetry]
-name = "highwind_python"
+name = "highwind"
 version = "0.1.0"
 description = "Python SDK for Highwind (https://highwind.ai/)"
 authors = ["Melio AI, Inc."]
@@ -8,12 +8,15 @@ readme = "README.md"
 [tool.poetry.dependencies]
 python = "3.12.1"
 requests = "^2.31.0"
+python-dotenv = "^1.0.1"
+requests-oauthlib = "^2.0.0"
 
 [tool.poetry.group.dev.dependencies]
 isort = "^5.13.2"
 pytest = "^8.2.1"
 pre-commit = "^3.7.1"
 black = "^24.4.2"
+requests-mock = "^1.12.1"
 
 [build-system]
 requires = ["poetry-core"]
