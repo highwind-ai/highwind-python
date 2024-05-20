@@ -30,5 +30,29 @@ We also use [pre-commit](https://pre-commit.com/), so install that too by follow
 Then run:
 
 ```sh
+pre-commit install
+```
 
+### Running tests
+
+Simply run:
+
+```sh
+pytest
+```
+
+### Building and Publishing the SDK
+
+To build the package, simply run:
+
+```sh
+poetry build
+```
+
+This creates a new (gitignored) folder called `dist/` in the root of the project.
+
+To publish the package to PyPI, simply run:
+
+```sh
+poetry publish
 ```
