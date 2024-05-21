@@ -19,7 +19,7 @@ from typing import Dict
 
 from highwind import UseCase
 
-use_case: UseCase = UseCase(id="a1...88")
+use_case: UseCase = UseCase(id="a1...88") # You'll need to get this from the Highwind Web UI
 
 use_case.name # 'IRIS Classifier'
 

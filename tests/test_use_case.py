@@ -53,13 +53,13 @@ class TestUseCase:
 
         assert (
             deployment_inference.inference_url
-            == "http://abcd1234.efgh5678.inf.dev.highwind.cloud"
+            == "https://api.kubeflow.dev.highwind.cloud/v2/models/abcd1234/infer"
         )
 
         mock_inference_response = {"some": "response"}
 
         mock_api.post(
-            "http://abcd1234.efgh5678.inf.dev.highwind.cloud/",
+            "https://api.kubeflow.dev.highwind.cloud/v2/models/abcd1234/infer",
             json=mock_inference_response,
         )
 
