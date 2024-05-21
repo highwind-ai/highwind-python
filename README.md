@@ -1,10 +1,51 @@
-# Highwind Python
+# Highwind
 
 A Python SDK for [Highwind](https://highwind.ai/).
 
 ## Installation
 
-TODO: DOCUMENT INSTALLATION
+The package is made available on the Python Package Index ([PyPI](https://pypi.org/)).
+
+```sh
+pip install highwind
+```
+
+## Usage and Current Features
+
+### 1. Run Use Case inference
+
+```py
+from typing import Dict
+
+from highwind import UseCase
+
+use_case: UseCase = UseCase(uuid="d49bc0c3-1b16-4fe4-957d-0e4763201e6d")
+
+inference_payload: Dict = {
+    "inputs": [
+        {
+            "name": "input-0",
+            "shape": [1],
+            "datatype": "BYTES",
+            "parameters": None,
+            "data": [[6.1, 2.8, 4.7, 1.2]],
+        }
+    ]
+}
+
+
+result: Dict = use_case.run_inference(inference_payload)
+```
+
+## Full feature set
+
+- [ ] Create an Asset and upload its files from your local machine
+- [ ] Create a UseCase
+- [ ] Search for all your Assets and get their UUIDs
+- [ ] Link Assets to a UseCase
+- [ ] Search for all your UseCases and get their UUIDs
+- [ ] Deploy a UseCase
+- [x] Run inference on a deployed UseCase
 
 ## Contributing
 
