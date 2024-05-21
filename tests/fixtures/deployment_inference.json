@@ -1,0 +1,37 @@
+{
+  "deployment_id": "fbb035c6-ed80-45ac-9226-c4a3f0839607",
+  "creation_timestamp": "2024-05-17T09:09:19Z",
+  "name": "abcd1234",
+  "namespace": "efgh5678",
+  "inference_url": "http://abcd1234.efgh5678.inf.dev.highwind.cloud",
+  "status": "Ready",
+  "conditions": [
+    {
+      "lastTransitionTime": "2024-05-17T09:09:51Z",
+      "status": "True",
+      "type": "IngressReady"
+    },
+    {
+      "lastTransitionTime": "2024-05-17T09:09:50Z",
+      "severity": "Info",
+      "status": "True",
+      "type": "PredictorConfigurationReady"
+    },
+    {
+      "lastTransitionTime": "2024-05-17T09:09:51Z",
+      "status": "True",
+      "type": "PredictorReady"
+    },
+    {
+      "lastTransitionTime": "2024-05-17T09:09:51Z",
+      "severity": "Info",
+      "status": "True",
+      "type": "PredictorRouteReady"
+    },
+    {
+      "lastTransitionTime": "2024-05-17T09:09:51Z",
+      "status": "True",
+      "type": "Ready"
+    }
+  ]
+}

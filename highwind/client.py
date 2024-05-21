@@ -1,16 +1,17 @@
-import uuid
-from http.server import BaseHTTPRequestHandler, HTTPServer
-from typing import Dict, Optional, Tuple
-
-import requests
 from dotenv import load_dotenv
 
 load_dotenv()
 
+
 import base64
 import hashlib
 import os
+import uuid
+from http.server import BaseHTTPRequestHandler, HTTPServer
+from typing import Dict, Optional, Tuple
 from urllib.parse import urlencode
+
+import requests
 
 
 class Client:
@@ -68,6 +69,30 @@ class Client:
     def __init__(self):
         self.access_token: Optional[str] = None
 
+    def get(
+        self,
+        url: str,
+        params: Optional[Dict] = None,
+        data: Optional[Dict] = None,
+    ) -> Dict:
+        """
+        Performs an HTTP GET to the Highwind API.
+
+        Raises an HTTPError if there is one.
+
+        Returns a Dictionary of whatever JSON the Highwind API returns, if the response
+        is successful.
+        """
+        self._login_if_not_already()
+
+        full_url: str = f"{Client.HIGHWIND_API_URL}/{url}/"
+        headers: Dict = {"Authorization": f"Bearer {self.access_token}"}
+
+        response = requests.get(url=full_url, params=params, data=data, headers=headers)
+        response.raise_for_status()
+
+        return response.json()
+
     def login(self) -> bool:
         """
         Begins a login flow.
@@ -98,6 +123,15 @@ class Client:
             )
 
         return True
+
+    def _login_if_not_already(self) -> None:
+        """
+        Triggers the login flow if and only if the User has not already logged in.
+        """
+        if self.access_token:
+            return
+        else:
+            self.login()
 
     def _start_server_to_listen_for_auth_code(self) -> Tuple[str, str]:
         """

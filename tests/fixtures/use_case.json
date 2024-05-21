@@ -1,0 +1,60 @@
+{
+  "name": "iris-classifier",
+  "description": "iris-classifier description...",
+  "version": "",
+  "price_usd": 0,
+  "published": false,
+  "inference_schema": "{\n  \"$schema\": \"http://json-schema.org/draft-07/schema\",\n  \"title\": \"Generated schema for Root\",\n  \"type\": \"object\",\n  \"properties\": {\n    \"inputs\": {\n      \"type\": \"array\",\n      \"items\": {\n        \"type\": \"object\",\n        \"properties\": {\n          \"name\": {\n            \"type\": \"string\"\n          },\n          \"shape\": {\n            \"type\": \"array\",\n            \"items\": {\n              \"type\": \"number\"\n            }\n          },\n          \"datatype\": {\n            \"type\": \"string\"\n          },\n          \"data\": {\n            \"type\": \"array\",\n            \"items\": {\n              \"type\": \"array\",\n              \"items\": {\n                \"type\": \"number\"\n              }\n            }\n          }\n        },\n        \"required\": [\n          \"name\",\n          \"shape\",\n          \"datatype\",\n          \"data\"\n        ]\n      }\n    }\n  },\n  \"required\": [\n    \"inputs\"\n  ]\n}",
+  "inference_schema_type": "JSON",
+  "id": "a1fe1842-5ce0-4107-ae09-44a75d6b6c88",
+  "cover_image": null,
+  "created_at": "2024-05-17T09:08:47.567484+00:00",
+  "updated_at": "2024-05-17T09:09:16.650165+00:00",
+  "archived": false,
+  "archived_at": null,
+  "user_links": [
+    {
+      "user_id": "73c62d43-bd1b-4774-a276-1e187c0b8b4c",
+      "use_case_id": "a1fe1842-5ce0-4107-ae09-44a75d6b6c88",
+      "role": "Owner",
+      "id": "af09e483-f51a-4568-b211-da76a06c0f6e",
+      "user": {
+        "username": "person@melio.ai",
+        "id": "73c62d43-bd1b-4774-a276-1e187c0b8b4c",
+        "created_at": "2024-04-19T03:23:53.686591+00:00",
+        "updated_at": "2024-04-19T03:23:53.686591+00:00"
+      },
+      "use_case": {
+        "name": "iris-classifier",
+        "description": "iris-classifier description...",
+        "version": "",
+        "price_usd": 0,
+        "published": false,
+        "inference_schema": "{\n  \"$schema\": \"http://json-schema.org/draft-07/schema\",\n  \"title\": \"Generated schema for Root\",\n  \"type\": \"object\",\n  \"properties\": {\n    \"inputs\": {\n      \"type\": \"array\",\n      \"items\": {\n        \"type\": \"object\",\n        \"properties\": {\n          \"name\": {\n            \"type\": \"string\"\n          },\n          \"shape\": {\n            \"type\": \"array\",\n            \"items\": {\n              \"type\": \"number\"\n            }\n          },\n          \"datatype\": {\n            \"type\": \"string\"\n          },\n          \"data\": {\n            \"type\": \"array\",\n            \"items\": {\n              \"type\": \"array\",\n              \"items\": {\n                \"type\": \"number\"\n              }\n            }\n          }\n        },\n        \"required\": [\n          \"name\",\n          \"shape\",\n          \"datatype\",\n          \"data\"\n        ]\n      }\n    }\n  },\n  \"required\": [\n    \"inputs\"\n  ]\n}",
+        "inference_schema_type": "JSON",
+        "id": "a1fe1842-5ce0-4107-ae09-44a75d6b6c88",
+        "cover_image": null,
+        "created_at": "2024-05-17T09:08:47.567484+00:00",
+        "updated_at": "2024-05-17T09:09:16.650165+00:00",
+        "archived": false,
+        "archived_at": null
+      },
+      "created_at": "2024-05-17T09:08:47.567484+00:00",
+      "updated_at": "2024-05-17T09:08:47.567484+00:00",
+      "archived": false,
+      "archived_at": null
+    }
+  ],
+  "asset_links": [],
+  "pipelines": [],
+  "deployment_details": {
+    "deployment_id": null,
+    "deployable_asset_id": null,
+    "deployable": false,
+    "predictor_repository_id": null,
+    "transformer_repository_id": null,
+    "model_asset_id": null,
+    "predictor_uri": null,
+    "transformer_uri": null
+  }
+}
