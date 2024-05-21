@@ -46,6 +46,7 @@ result: Dict = use_case.run_inference(inference_payload)
 - [ ] Search for all your UseCases and get their UUIDs
 - [ ] Deploy a UseCase
 - [x] Run inference on a deployed UseCase
+- [ ] Many more future features
 
 ## Contributing
 
