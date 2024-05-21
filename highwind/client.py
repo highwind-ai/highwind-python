@@ -2,11 +2,11 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-
 import base64
 import hashlib
 import os
 import uuid
+import webbrowser
 from http.server import BaseHTTPRequestHandler, HTTPServer
 from typing import Dict, Optional, Tuple
 from urllib.parse import urlencode
@@ -30,9 +30,25 @@ class Client:
                 self.server.state = query_params.get("state")  # type: ignore
 
                 self.send_response(200)
+                self.send_header("Content-type", "text/html")
                 self.end_headers()
+
                 self.wfile.write(
-                    b"Successfully authenticated with Highwind! You can now close this browser window."
+                    b"""
+                    <html>
+                    <head>
+                        <script type="text/javascript">
+                            window.onload = function() {
+                                window.open('', '_self', '');
+                                window.close();
+                            };
+                        </script>
+                    </head>
+                    <body>
+                        Successfully authenticated with Highwind! You can now close this browser window.
+                    </body>
+                    </html>
+                    """
                 )
 
     # Fixed constants
@@ -41,6 +57,9 @@ class Client:
     CODE_CHALLENGE_METHOD: str = "S256"
 
     # Constants read from environment variables with default fallbacks:
+    AUTOMATICALLY_OPEN_BROWSER: bool = (
+        os.environ.get("AUTOMATICALLY_OPEN_BROWSER", "True") == "True"
+    )
     LOCALHOST_AUTH_CALLBACK_PORT: str = os.environ.get(
         "LOCALHOST_AUTH_CALLBACK_PORT",
         default="8000",
@@ -103,12 +122,18 @@ class Client:
         Outputs a URL for the user of the SDK to authenticate with Highwind and starts
         an HTTPServer to listen for a localhost callback.
 
+        If AUTOMATICALLY_OPEN_BROWSER is set to 'True', will automatically open the
+        User's default web browser and navigate to the authentication URL.
+
         Returns True upon successful login
 
         Also sets `access_token`
         """
         auth_url, code_verifier = self._generate_auth_url()
         self._print_auth_url(auth_url)
+
+        if Client.AUTOMATICALLY_OPEN_BROWSER:
+            self._automatically_open_url(auth_url)
 
         (auth_code, _state) = self._start_server_to_listen_for_auth_code()
 
@@ -252,3 +277,6 @@ class Client:
         print("+---------------------------------------------------------------------+")
         print(auth_url)
         print("")
+
+    def _automatically_open_url(self, auth_url: str) -> None:
+        webbrowser.open(auth_url)

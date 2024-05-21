@@ -21,3 +21,9 @@ def mock_api():
         )
 
         yield mock_api
+
+
+@pytest.fixture(autouse=True)
+def mock_web_browser():
+    with patch("highwind.client.webbrowser"):
+        yield  # Prevents opening a browser when running tests
