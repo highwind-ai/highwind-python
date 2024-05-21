@@ -23,9 +23,15 @@ class UseCase:
 
     def run_inference(self, inference_payload: Dict) -> Dict:
         if self.deployment_inference:
+            headers: Dict = {
+                "Authorization": self.client.access_token,
+                "infHost": self.deployment_inference.inf_host_header,
+            }
+
             response = requests.post(
                 url=self.deployment_inference.inference_url,
                 json=inference_payload,
+                headers=headers,
             )
             response.raise_for_status()
             return response.json()

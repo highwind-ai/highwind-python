@@ -19,7 +19,9 @@ from typing import Dict
 
 from highwind import UseCase
 
-use_case: UseCase = UseCase(uuid="d49bc0c3-1b16-4fe4-957d-0e4763201e6d")
+use_case: UseCase = UseCase(id="a1...88")
+
+use_case.name # 'IRIS Classifier'
 
 inference_payload: Dict = {
     "inputs": [
@@ -33,8 +35,24 @@ inference_payload: Dict = {
     ]
 }
 
-
 result: Dict = use_case.run_inference(inference_payload)
+
+print(result)
+# {
+#     "id": "c1958d66-27d0-403d-9ae4-45fb9f7dac8b",
+#     "model_name": "c8uj6o4d",
+#     "model_version": None,
+#     "outputs": [
+#         {
+#             "data": [1],
+#             "datatype": "INT64",
+#             "name": "output-0",
+#             "parameters": None,
+#             "shape": [1],
+#         }
+#     ],
+#     "parameters": None,
+# }
 ```
 
 ## Full feature set
@@ -46,7 +64,7 @@ result: Dict = use_case.run_inference(inference_payload)
 - [ ] Search for all your UseCases and get their UUIDs
 - [ ] Deploy a UseCase
 - [x] Run inference on a deployed UseCase
-- [ ] Many more future features
+- [ ] Many more future features as Highwind develops
 
 ## Contributing
 
