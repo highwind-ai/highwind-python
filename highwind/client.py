@@ -1,6 +1,6 @@
 import uuid
 from http.server import BaseHTTPRequestHandler, HTTPServer
-from typing import Dict, Tuple
+from typing import Dict, Optional, Tuple
 
 import requests
 from dotenv import load_dotenv
@@ -66,7 +66,7 @@ class Client:
     )
 
     def __init__(self):
-        pass  # TODO: CHECK FOR CORRECT CONFIGURATION
+        self.access_token: Optional[str] = None
 
     def login(self) -> bool:
         """
@@ -79,6 +79,8 @@ class Client:
         an HTTPServer to listen for a localhost callback.
 
         Returns True upon successful login
+
+        Also sets `access_token`
         """
         auth_url, code_verifier = self._generate_auth_url()
         self._print_auth_url(auth_url)
@@ -87,9 +89,9 @@ class Client:
 
         token: Dict[str, str] = self._get_token(auth_code, code_verifier)
 
-        access_token: str = token.get("access_token", "")
+        self.access_token: str = token.get("access_token", "")
 
-        if not access_token:
+        if not self.access_token:
             raise Exception(
                 "Token received from Keycloak did not contain 'access_token': "
                 + str(token)
