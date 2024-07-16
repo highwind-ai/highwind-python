@@ -103,7 +103,7 @@ pytest
 
 ### Building and Publishing the SDK
 
-To build the package, simply run:
+To build the package, simply bump the version number in `pyproject.toml`. Then run:
 
 ```sh
 poetry build
