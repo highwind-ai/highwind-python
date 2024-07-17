@@ -85,8 +85,8 @@ class Client:
         default="http://localhost:8000/callback",
     )
 
-    def __init__(self):
-        self.access_token: Optional[str] = None
+    def __init__(self, access_token: Optional[str] = None):
+        self.access_token: Optional[str] = access_token
 
     def get(
         self,
@@ -111,6 +111,9 @@ class Client:
         response.raise_for_status()
 
         return response.json()
+
+    def is_logged_in(self) -> bool:
+        return bool(self.access_token)
 
     def login(self) -> bool:
         """
@@ -153,7 +156,7 @@ class Client:
         """
         Triggers the login flow if and only if the User has not already logged in.
         """
-        if self.access_token:
+        if self.is_logged_in():
             return
         else:
             self.login()
