@@ -33,7 +33,7 @@ class GradioApp:
     """
 
     @classmethod
-    def setup_with_request(request) -> Optional[Client]:
+    def setup_with_request(cls, request) -> Optional[Client]:
         """
         Initialize a Gradio App to work with Highwind. Accepts a gradio.Request object.
 
@@ -51,9 +51,9 @@ class GradioApp:
             # request.session will raise an AssertionError when SessionMiddleware is not
             # used. This is the case when the Gradio App is not wrapped in a FastAPI
             # application.
-            return False
+            return None
 
         if not access_token:
-            return False
+            return None
 
         return ClientFactory.get_client(access_token=access_token)
