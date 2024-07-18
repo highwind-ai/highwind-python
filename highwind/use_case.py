@@ -15,7 +15,7 @@ class UseCase:
     def __init__(self, id: str):
         self.id: str = id
 
-        self.client: Client = ClientFactory.client()
+        self.client: Client = ClientFactory.get_client()
         self._raw_data: Dict = self.client.get(f"use_cases/mine/{self.id}")
 
         self._extract_basic_details()

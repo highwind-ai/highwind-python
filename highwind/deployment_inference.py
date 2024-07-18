@@ -23,7 +23,7 @@ class DeploymentInference:
     def __init__(self, use_case_id: str):
         self.use_case_id: str = use_case_id
 
-        self.client: Client = ClientFactory.client()
+        self.client: Client = ClientFactory.get_client()
         self._raw_data: Dict = self.client.get(
             f"deployments/mine/{self.use_case_id}/deployment/inference"
         )

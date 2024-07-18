@@ -3,11 +3,11 @@ from highwind.client_factory import ClientFactory
 
 
 class TestClientFactory:
-    def test_client_creates_and_returns_a_memoized_client(self):
-        client_1 = ClientFactory.client()
+    def test_get_client_creates_and_returns_a_memoized_client(self):
+        client_1 = ClientFactory.get_client()
         assert isinstance(client_1, Client)
 
-        client_2 = ClientFactory.client()
+        client_2 = ClientFactory.get_client()
         assert isinstance(client_2, Client)
 
         # Assert client_1 and client_2 exist in the same space in memory
