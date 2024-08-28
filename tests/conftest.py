@@ -16,7 +16,7 @@ def mock_api():
     with requests_mock.Mocker() as mock_api:
         mock_token: Dict = {"access_token": "access-token-123"}
         mock_api.post(
-            "https://keycloak.dev.highwind.cloud/realms/highwind-realm/protocol/openid-connect/token",
+            "https://keycloak.zindi.highwind.cloud/realms/highwind-realm/protocol/openid-connect/token",
             json=mock_token,
         )
 

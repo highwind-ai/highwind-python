@@ -98,6 +98,9 @@ class Client:
         self.refresh_token: Optional[str] = refresh_token
         self.token_expiry: Optional[str] = token_expiry
 
+    def is_logged_in(self) -> bool:
+        return bool(self.access_token)
+
     def get(
         self,
         url: str,
