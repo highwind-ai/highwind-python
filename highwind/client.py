@@ -55,6 +55,7 @@ class Client:
 
     # Fixed constants
     GRANT_TYPE: str = "authorization_code"
+    REFRESH_GRANT_TYPE: str = "refresh_token"
     RESPONSE_TYPE: str = "code"
     CODE_CHALLENGE_METHOD: str = "S256"
     TIME_FORMAT: str = "%Y-%m-%dT%H:%M:%S"
@@ -247,7 +248,7 @@ class Client:
         )
 
         data: Dict[str, str] = {
-            "grant_type": Client.GRANT_TYPE,
+            "grant_type": Client.REFRESH_GRANT_TYPE,
             "client_id": Client.HIGHWIND_AUTH_CLIENT_ID,
             "refresh_token": self.refresh_token,
         }
