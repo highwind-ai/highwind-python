@@ -1,3 +1,5 @@
+import datetime
+
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -85,8 +87,15 @@ class Client:
         default="http://localhost:8000/callback",
     )
 
-    def __init__(self, access_token: Optional[str] = None):
+    def __init__(
+        self,
+        access_token: Optional[str] = None,
+        refresh_token: Optional[str] = None,
+        token_expiry: Optional[str] = None,
+    ):
         self.access_token: Optional[str] = access_token
+        self.refresh_token: Optional[str] = refresh_token
+        self.token_expiry: Optional[str] = token_expiry
 
     def get(
         self,
@@ -102,7 +111,7 @@ class Client:
         Returns a Dictionary of whatever JSON the Highwind API returns, if the response
         is successful.
         """
-        self._login_if_not_already()
+        self._authenticate()
 
         full_url: str = f"{Client.HIGHWIND_API_URL}/{url}/"
         headers: Dict = {"Authorization": f"Bearer {self.access_token}"}
@@ -111,9 +120,6 @@ class Client:
         response.raise_for_status()
 
         return response.json()
-
-    def is_logged_in(self) -> bool:
-        return bool(self.access_token)
 
     def login(self) -> bool:
         """
@@ -143,6 +149,10 @@ class Client:
         token: Dict[str, str] = self._get_token(auth_code, code_verifier)
 
         self.access_token: str = token.get("access_token", "")
+        self.refresh_token: str = token.get("refresh_token", "")
+        self.token_expiry: str = token.get(
+            "expires_in", ""
+        )  # TODO: get the actual datetime
 
         if not self.access_token:
             raise Exception(
@@ -152,14 +162,26 @@ class Client:
 
         return True
 
-    def _login_if_not_already(self) -> None:
+    def _authenticate(self) -> None:
         """
-        Triggers the login flow if and only if the User has not already logged in.
+        Performs the authentication flow.
+
+        If there is no access token, performs the login flow.
+        If there is an access token, but it is expired, performs the refresh token flow.
+        If there is an access token and it is not expired, does nothing.
         """
-        if self.is_logged_in():
-            return
-        else:
+        if not self.access_token:
             self.login()
+        elif self._is_access_token_expired():
+            self._refresh_auth_token()
+
+    def _is_access_token_expired(self) -> bool:
+        """
+        Checks if the access token is expired.
+        """
+        return self.token_expiry and datetime.now(
+            tz=datetime.timezone.utc
+        ) > datetime.strptime(self.token_expiry, "%Y-%m-%dT%H:%M:%S")
 
     def _start_server_to_listen_for_auth_code(self) -> Tuple[str, str]:
         """
@@ -212,6 +234,22 @@ class Client:
         response.raise_for_status()  # Raises an HTTPError if one occurred
 
         return response.json()
+
+    def _refresh_auth_token(self):
+        refresh_token_url: str = (
+            f"{Client.HIGHWIND_AUTH_URL}/realms/{Client.HIGHWIND_AUTH_REALM_ID}/protocol/openid-connect/token"
+        )
+
+        data: Dict[str, str] = {
+            "grant_type": Client.GRANT_TYPE,
+            "client_id": Client.HIGHWIND_AUTH_CLIENT_ID,
+            "refresh_token": self.refresh_token,
+        }
+
+        response = requests.post(token_url, data=data)
+        response.raise_for_status()  # Raises an HTTPError if one occurred
+
+        ...
 
     def _generate_auth_url(self) -> Tuple[str, str]:
         """
