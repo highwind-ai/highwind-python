@@ -13,11 +13,11 @@ from .client_factory import ClientFactory
 class DeploymentInference:
     INFERENCE_BASE_URL: str = os.environ.get(
         "INFERENCE_BASE_URL",
-        default="https://api.kubeflow.dev.highwind.cloud/v2/models",
+        default="https://api.kubeflow.zindi.highwind.cloud/v2/models",
     )
     INF_HOST_FQDN: str = os.environ.get(
         "INF_HOST_FQDN",
-        default="inf.dev.highwind.cloud",
+        default="inf.zindi.highwind.cloud",
     )
 
     def __init__(self, use_case_id: str):

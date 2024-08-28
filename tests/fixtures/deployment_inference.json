@@ -3,7 +3,7 @@
   "creation_timestamp": "2024-05-17T09:09:19Z",
   "name": "abcd1234",
   "namespace": "efgh5678",
-  "inference_url": "http://abcd1234.efgh5678.inf.dev.highwind.cloud",
+  "inference_url": "http://abcd1234.efgh5678.inf.zindi.highwind.cloud",
   "status": "Ready",
   "conditions": [
     {

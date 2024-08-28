@@ -1,3 +1,5 @@
+from datetime import datetime, timedelta, timezone
+
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -8,7 +10,7 @@ import os
 import uuid
 import webbrowser
 from http.server import BaseHTTPRequestHandler, HTTPServer
-from typing import Dict, Optional, Tuple
+from typing import Dict, Optional, Tuple, Union
 from urllib.parse import urlencode
 
 import requests
@@ -55,6 +57,7 @@ class Client:
     GRANT_TYPE: str = "authorization_code"
     RESPONSE_TYPE: str = "code"
     CODE_CHALLENGE_METHOD: str = "S256"
+    TIME_FORMAT: str = "%Y-%m-%dT%H:%M:%S"
 
     # Constants read from environment variables with default fallbacks:
     AUTOMATICALLY_OPEN_BROWSER: bool = (
@@ -66,11 +69,11 @@ class Client:
     )
     HIGHWIND_API_URL: str = os.environ.get(
         "HIGHWIND_API_URL",
-        default="https://api.dev.highwind.cloud/api/v1",
+        default="https://api.zindi.highwind.cloud/api/v1",
     )
     HIGHWIND_AUTH_URL: str = os.environ.get(
         "HIGHWIND_AUTH_URL",
-        default="https://keycloak.dev.highwind.cloud",
+        default="https://keycloak.zindi.highwind.cloud",
     )
     HIGHWIND_AUTH_REALM_ID: str = os.environ.get(
         "HIGHWIND_AUTH_REALM_ID",
@@ -85,8 +88,18 @@ class Client:
         default="http://localhost:8000/callback",
     )
 
-    def __init__(self, access_token: Optional[str] = None):
+    def __init__(
+        self,
+        access_token: Optional[str] = None,
+        refresh_token: Optional[str] = None,
+        token_expiry: Optional[str] = None,
+    ):
         self.access_token: Optional[str] = access_token
+        self.refresh_token: Optional[str] = refresh_token
+        self.token_expiry: Optional[str] = token_expiry
+
+    def is_logged_in(self) -> bool:
+        return bool(self.access_token)
 
     def get(
         self,
@@ -102,7 +115,7 @@ class Client:
         Returns a Dictionary of whatever JSON the Highwind API returns, if the response
         is successful.
         """
-        self._login_if_not_already()
+        self._authenticate()
 
         full_url: str = f"{Client.HIGHWIND_API_URL}/{url}/"
         headers: Dict = {"Authorization": f"Bearer {self.access_token}"}
@@ -111,9 +124,6 @@ class Client:
         response.raise_for_status()
 
         return response.json()
-
-    def is_logged_in(self) -> bool:
-        return bool(self.access_token)
 
     def login(self) -> bool:
         """
@@ -140,9 +150,9 @@ class Client:
 
         (auth_code, _state) = self._start_server_to_listen_for_auth_code()
 
-        token: Dict[str, str] = self._get_token(auth_code, code_verifier)
+        token: Dict[str, str] = self._get_access_token(auth_code, code_verifier)
 
-        self.access_token: str = token.get("access_token", "")
+        self._set_variables_from_token(token)
 
         if not self.access_token:
             raise Exception(
@@ -152,14 +162,32 @@ class Client:
 
         return True
 
-    def _login_if_not_already(self) -> None:
+    def _authenticate(self) -> None:
         """
-        Triggers the login flow if and only if the User has not already logged in.
+        Performs the authentication flow.
+
+        1. If there is no access token, performs the login flow.
+        2. If there is an access token, but it is expired, performs the refresh token flow.
+        3. If there is an access token and it is not expired, does nothing.
         """
-        if self.is_logged_in():
-            return
-        else:
+        if not self.access_token:
             self.login()
+        elif self._is_access_token_expired():
+            self._refresh_access_token()
+
+    def _is_access_token_expired(self) -> bool:
+        """
+        Checks if the access token is expired.
+        """
+        if not self.token_expiry:
+            return False
+
+        now: datetime = datetime.now(tz=timezone.utc)
+        expiry: datetime = datetime.strptime(
+            self.token_expiry, self.TIME_FORMAT
+        ).replace(tzinfo=timezone.utc)
+
+        return expiry <= now
 
     def _start_server_to_listen_for_auth_code(self) -> Tuple[str, str]:
         """
@@ -181,7 +209,7 @@ class Client:
 
         return (server.auth_code, server.state)  # type: ignore
 
-    def _get_token(self, auth_code, code_verifier) -> Dict:
+    def _get_access_token(self, auth_code, code_verifier) -> Dict:
         """
         Exchanges an auth_code (str) with Keycloak to get a valid auth token.
 
@@ -213,6 +241,24 @@ class Client:
 
         return response.json()
 
+    def _refresh_access_token(self):
+        refresh_token_url: str = (
+            f"{Client.HIGHWIND_AUTH_URL}/realms/{Client.HIGHWIND_AUTH_REALM_ID}/protocol/openid-connect/token"
+        )
+
+        data: Dict[str, str] = {
+            "grant_type": Client.GRANT_TYPE,
+            "client_id": Client.HIGHWIND_AUTH_CLIENT_ID,
+            "refresh_token": self.refresh_token,
+        }
+
+        response = requests.post(refresh_token_url, data=data)
+        response.raise_for_status()  # Raises an HTTPError if one occurred
+
+        token: Dict[str, str] = response.json()
+
+        self._set_variables_from_token(token)
+
     def _generate_auth_url(self) -> Tuple[str, str]:
         """
         Generates an expiring authentication URL that the user of the SDK can follow to
@@ -220,7 +266,7 @@ class Client:
 
         The auth URL will look something like this:
 
-        "https://keycloak.dev.highwind.cloud/realms/highwind-realm/protocol/openid-connect/auth
+        "https://keycloak.zindi.highwind.cloud/realms/highwind-realm/protocol/openid-connect/auth
         ?client_id=highwind-sdk
         &response_type=code
         &scope=openid
@@ -283,3 +329,18 @@ class Client:
 
     def _automatically_open_url(self, auth_url: str) -> None:
         webbrowser.open(auth_url)
+
+    def _set_variables_from_token(self, token: Dict[str, str]) -> None:
+        """
+        Given an Oauth2 Token in dictionary form, sets the Client's:
+            1. access_token
+            2. refresh_token
+            3. token_expiry
+        """
+        expires_in: Union[float, str] = dict(token).get("expires_in", 0)
+
+        self.access_token = token.get("access_token", "")
+        self.refresh_token = token.get("refresh_token", "")
+        self.token_expiry = (
+            datetime.now(tz=timezone.utc) + timedelta(seconds=float(expires_in))
+        ).strftime(self.TIME_FORMAT)

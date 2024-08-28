@@ -40,13 +40,20 @@ class GradioApp:
         Parameters:
             - request: the gradio.Request object (https://www.gradio.app/docs/gradio/request)
 
+            request needs to have the following keys in the session:
+                - access_token (str)
+                - refresh_token (str)
+                - token_expiry (str in the form of %Y-%m-%dT%H:%M:%S)
+
         Returns:
             - An optional highwind.Client instance. This will be None if either the
               request.session is not available (i.e. SessionMiddleware is not used) or
-              if the highwind_access_token was not present in the request's session.
+              if the access_token was not present in the request's session.
         """
         try:
-            access_token: str = request.session.get("highwind_access_token", None)
+            access_token: Optional[str] = request.session.get("access_token", None)
+            refresh_token: Optional[str] = request.session.get("refresh_token", None)
+            token_expiry: Optional[str] = request.session.get("token_expiry", None)
         except AssertionError:
             # request.session will raise an AssertionError when SessionMiddleware is not
             # used. This is the case when the Gradio App is not wrapped in a FastAPI
@@ -56,4 +63,8 @@ class GradioApp:
         if not access_token:
             return None
 
-        return ClientFactory.get_client(access_token=access_token)
+        return ClientFactory.get_client(
+            access_token=access_token,
+            refresh_token=refresh_token,
+            token_expiry=token_expiry,
+        )

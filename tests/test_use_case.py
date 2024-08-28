@@ -12,7 +12,7 @@ class TestUseCase:
             mock_use_case = json.load(fixture)
 
         mock_api.get(
-            f"https://api.dev.highwind.cloud/api/v1/use_cases/mine/{use_case_id}/",
+            f"https://api.zindi.highwind.cloud/api/v1/use_cases/mine/{use_case_id}/",
             json=mock_use_case,
         )
 
@@ -28,7 +28,7 @@ class TestUseCase:
             mock_use_case = json.load(fixture)
 
         mock_api.get(
-            f"https://api.dev.highwind.cloud/api/v1/use_cases/mine/{use_case_id}/",
+            f"https://api.zindi.highwind.cloud/api/v1/use_cases/mine/{use_case_id}/",
             json=mock_use_case,
         )
 
@@ -36,7 +36,7 @@ class TestUseCase:
             mock_deployment_inference = json.load(fixture)
 
         mock_api.get(
-            f"https://api.dev.highwind.cloud/api/v1/deployments/mine/{use_case_id}/deployment/inference/",
+            f"https://api.zindi.highwind.cloud/api/v1/deployments/mine/{use_case_id}/deployment/inference/",
             json=mock_deployment_inference,
         )
 
@@ -53,13 +53,13 @@ class TestUseCase:
 
         assert (
             deployment_inference.inference_url
-            == "https://api.kubeflow.dev.highwind.cloud/v2/models/abcd1234/infer"
+            == "https://api.kubeflow.zindi.highwind.cloud/v2/models/abcd1234/infer"
         )
 
         mock_inference_response = {"some": "response"}
 
         mock_api.post(
-            "https://api.kubeflow.dev.highwind.cloud/v2/models/abcd1234/infer",
+            "https://api.kubeflow.zindi.highwind.cloud/v2/models/abcd1234/infer",
             json=mock_inference_response,
         )
 
