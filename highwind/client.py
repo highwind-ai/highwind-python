@@ -185,7 +185,7 @@ class Client:
         now: datetime = datetime.now(tz=timezone.utc)
         expiry: datetime = datetime.strptime(
             self.token_expiry, self.TIME_FORMAT
-        ).astimezone(tz=timezone.utc)
+        ).replace(tzinfo=timezone.utc)
 
         return expiry <= now
 
