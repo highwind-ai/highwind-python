@@ -69,11 +69,11 @@ class Client:
     )
     HIGHWIND_API_URL: str = os.environ.get(
         "HIGHWIND_API_URL",
-        default="https://api.dev.highwind.cloud/api/v1",
+        default="https://api.zindi.highwind.cloud/api/v1",
     )
     HIGHWIND_AUTH_URL: str = os.environ.get(
         "HIGHWIND_AUTH_URL",
-        default="https://keycloak.dev.highwind.cloud",
+        default="https://keycloak.zindi.highwind.cloud",
     )
     HIGHWIND_AUTH_REALM_ID: str = os.environ.get(
         "HIGHWIND_AUTH_REALM_ID",
@@ -266,7 +266,7 @@ class Client:
 
         The auth URL will look something like this:
 
-        "https://keycloak.dev.highwind.cloud/realms/highwind-realm/protocol/openid-connect/auth
+        "https://keycloak.zindi.highwind.cloud/realms/highwind-realm/protocol/openid-connect/auth
         ?client_id=highwind-sdk
         &response_type=code
         &scope=openid
