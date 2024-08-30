@@ -10,7 +10,7 @@ import os
 import uuid
 import webbrowser
 from http.server import BaseHTTPRequestHandler, HTTPServer
-from typing import Dict, Optional, Tuple, Union
+from typing import Dict, Optional, Tuple
 from urllib.parse import urlencode
 
 import requests
@@ -92,15 +92,18 @@ class Client:
     def __init__(
         self,
         access_token: Optional[str] = None,
+        access_token_expires_in: float = 0,
+        access_token_expires_at: Optional[str] = None,
         refresh_token: Optional[str] = None,
-        token_expiry: Optional[str] = None,
+        refresh_token_expires_in: float = 0,
+        refresh_token_expires_at: Optional[str] = None,
     ):
         self.access_token: Optional[str] = access_token
+        self.access_token_expires_in: float = access_token_expires_in
+        self.access_token_expires_at: Optional[str] = access_token_expires_at
         self.refresh_token: Optional[str] = refresh_token
-        self.token_expiry: Optional[str] = token_expiry
-
-    def is_logged_in(self) -> bool:
-        return bool(self.access_token)
+        self.refresh_token_expires_in: float = refresh_token_expires_in
+        self.refresh_token_expires_at: Optional[str] = refresh_token_expires_at
 
     def get(
         self,
@@ -141,7 +144,9 @@ class Client:
 
         Returns True upon successful login
 
-        Also sets `access_token`
+        Also sets `access_token`, `refresh_token`, `access_token_expires_in`,
+        `refresh_token_expires_in`, `access_token_expires_at`, and
+        `refresh_token_expires_at`.
         """
         auth_url, code_verifier = self._generate_auth_url()
         self._print_auth_url(auth_url)
@@ -167,26 +172,41 @@ class Client:
         """
         Performs the authentication flow.
 
+        1. If there is an access token and it is not expired, does nothing.
         1. If there is no access token, performs the login flow.
-        2. If there is an access token, but it is expired, performs the refresh token flow.
-        3. If there is an access token and it is not expired, does nothing.
+        2. If there is an expired access token, but a valid refresh token, performs the
+           refresh token flow.
+        3. If there is an expired refresh token, raises an exception.
         """
         if not self.access_token:
             self.login()
-        elif self._is_access_token_expired():
+        elif self.access_token and not self._is_access_token_expired():
+            return
+        elif self._is_access_token_expired() and not self._is_refresh_token_expired():
             self._refresh_access_token()
+        elif self._is_refresh_token_expired():
+            raise Exception("Please refresh your login.")
 
     def _is_access_token_expired(self) -> bool:
         """
         Checks if the access token is expired.
         """
-        if not self.token_expiry:
-            return False
+        return self._is_token_expired(self.access_token_expires_at)
+
+    def _is_refresh_token_expired(self) -> bool:
+        """
+        Checks if the refresh token is expired.
+        """
+        return self._is_token_expired(self.refresh_token_expires_at)
+
+    def _is_token_expired(self, timestamp: Optional[str]) -> bool:
+        if not timestamp:
+            return True  # If the token expiry is not set, it is assumed to have expired
 
         now: datetime = datetime.now(tz=timezone.utc)
-        expiry: datetime = datetime.strptime(
-            self.token_expiry, self.TIME_FORMAT
-        ).replace(tzinfo=timezone.utc)
+        expiry: datetime = datetime.strptime(timestamp, self.TIME_FORMAT).replace(
+            tzinfo=timezone.utc
+        )
 
         return expiry <= now
 
@@ -335,13 +355,24 @@ class Client:
         """
         Given an Oauth2 Token in dictionary form, sets the Client's:
             1. access_token
-            2. refresh_token
-            3. token_expiry
+            2. access_token_expires_in
+            3. access_token_expires_at
+            4. refresh_token
+            5. refresh_token_expires_in
+            6. refresh_token_expires_at
         """
-        expires_in: Union[float, str] = dict(token).get("expires_in", 0)
+        expires_in: float = float(dict(token).get("expires_in", 0))
+        refresh_expires_in: float = float(dict(token).get("refresh_expires_in", 0))
 
-        self.access_token = token.get("access_token", "")
-        self.refresh_token = token.get("refresh_token", "")
-        self.token_expiry = (
+        self.access_token = token.get("access_token", None)
+        self.access_token_expires_in = expires_in
+        self.access_token_expires_at = self._calculate_token_expiry(expires_in)
+
+        self.refresh_token = token.get("refresh_token", None)
+        self.refresh_token_expires_in = refresh_expires_in
+        self.refresh_token_expires_at = self._calculate_token_expiry(refresh_expires_in)
+
+    def _calculate_token_expiry(self, expires_in: float) -> str:
+        return (
             datetime.now(tz=timezone.utc) + timedelta(seconds=float(expires_in))
         ).strftime(self.TIME_FORMAT)

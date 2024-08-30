@@ -41,9 +41,13 @@ class GradioApp:
             - request: the gradio.Request object (https://www.gradio.app/docs/gradio/request)
 
             request needs to have the following keys in the session:
-                - access_token (str)
+                - access_token (Optional[str])
+                - access_token_expires_in (float)
+                - access_token_expires_at (Optional[str] in the form of %Y-%m-%dT%H:%M:%S)
+
                 - refresh_token (str)
-                - token_expiry (str in the form of %Y-%m-%dT%H:%M:%S)
+                - refresh_token_expires_in (float)
+                - refresh_token_expires_at (Optional[str] in the form of %Y-%m-%dT%H:%M:%S)
 
         Returns:
             - An optional highwind.Client instance. This will be None if either the
@@ -52,8 +56,20 @@ class GradioApp:
         """
         try:
             access_token: Optional[str] = request.session.get("access_token", None)
-            refresh_token: Optional[str] = request.session.get("refresh_token", None)
-            token_expiry: Optional[str] = request.session.get("token_expiry", None)
+            access_token_expires_in: float = request.session.get(
+                "access_token_expires_in", None
+            )
+            access_token_expires_at: Optional[str] = request.session.get(
+                "access_token_expires_at", None
+            )
+
+            refresh_token: str = request.session.get("refresh_token", None)
+            refresh_token_expires_in: float = request.session.get(
+                "refresh_token_expires_in", None
+            )
+            refresh_token_expires_at: Optional[str] = request.session.get(
+                "refresh_token_expires_at", None
+            )
         except AssertionError:
             # request.session will raise an AssertionError when SessionMiddleware is not
             # used. This is the case when the Gradio App is not wrapped in a FastAPI
@@ -65,6 +81,9 @@ class GradioApp:
 
         return ClientFactory.get_client(
             access_token=access_token,
+            access_token_expires_in=access_token_expires_in,
+            access_token_expires_at=access_token_expires_at,
             refresh_token=refresh_token,
-            token_expiry=token_expiry,
+            refresh_token_expires_in=refresh_token_expires_in,
+            refresh_token_expires_at=refresh_token_expires_at,
         )
