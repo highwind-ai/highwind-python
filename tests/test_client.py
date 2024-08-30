@@ -1,6 +1,7 @@
 import json
 from unittest.mock import patch
 
+import pytest
 from freezegun import freeze_time
 
 from highwind.client import Client
@@ -161,8 +162,30 @@ class TestClient:
         login_spy.assert_not_called()
         refresh_token_spy.assert_called_once()
 
-    @freeze_time("2012-01-14 01:10:00", tz_offset=0)
+    @freeze_time("2012-01-14 03:00:00", tz_offset=0)
     def test_get_will_raise_an_exception_if_the_refresh_token_is_expired(
         self, mock_api
     ):
-        assert 1 == 2
+        use_case_id: str = "d84258c7-b531-4ee8-8aca-639658c189c8"
+
+        with open("tests/fixtures/deployed_use_case.json") as fixture:
+            mock_use_case = json.load(fixture)
+
+        mock_api.get(
+            f"https://api.zindi.highwind.cloud/api/v1/use_cases/mine/{use_case_id}/",
+            json=mock_use_case,
+        )
+
+        client: Client = Client(
+            access_token="access-token-123",
+            access_token_expires_in=300,
+            access_token_expires_at="2012-01-14T01:00:00",  # 1 hour ago (EXPIRED)
+            refresh_token="refresh-token-123",
+            refresh_token_expires_in=1200,
+            refresh_token_expires_at="2012-01-14T02:00:00",  # 2 hours ago (EXPIRED)
+        )
+
+        with pytest.raises(Exception) as error:
+            client.get(f"use_cases/mine/{use_case_id}")
+
+        assert "Please refresh your login" in str(error.value)

@@ -80,6 +80,7 @@ class GradioApp:
             return None
 
         return ClientFactory.get_client(
+            force_recreate=True,
             access_token=access_token,
             access_token_expires_in=access_token_expires_in,
             access_token_expires_at=access_token_expires_at,
