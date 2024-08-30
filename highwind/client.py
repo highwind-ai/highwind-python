@@ -172,11 +172,11 @@ class Client:
         """
         Performs the authentication flow.
 
-        1. If there is an access token and it is not expired, does nothing.
         1. If there is no access token, performs the login flow.
-        2. If there is an expired access token, but a valid refresh token, performs the
+        2. If there is an access token and it is not expired, does nothing.
+        3. If there is an expired access token, but a valid refresh token, performs the
            refresh token flow.
-        3. If there is an expired refresh token, raises an exception.
+        4. If there is an expired refresh token, raises an exception.
         """
         if not self.access_token:
             self.login()
@@ -191,12 +191,18 @@ class Client:
         """
         Checks if the access token is expired.
         """
+        if self.access_token_expires_in == 0:
+            return False  # Access token is non-expiring
+
         return self._is_token_expired(self.access_token_expires_at)
 
     def _is_refresh_token_expired(self) -> bool:
         """
         Checks if the refresh token is expired.
         """
+        if self.refresh_token_expires_in == 0:
+            return False  # Refresh token is non-expiring
+
         return self._is_token_expired(self.refresh_token_expires_at)
 
     def _is_token_expired(self, timestamp: Optional[str]) -> bool:

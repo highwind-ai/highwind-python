@@ -189,3 +189,65 @@ class TestClient:
             client.get(f"use_cases/mine/{use_case_id}")
 
         assert "Please refresh your login" in str(error.value)
+
+    @freeze_time("2012-01-14 10:00:00", tz_offset=0)
+    def test_get_will_not_attempt_to_refresh_non_expiring_access_token(self, mock_api):
+        use_case_id: str = "d84258c7-b531-4ee8-8aca-639658c189c8"
+
+        with open("tests/fixtures/deployed_use_case.json") as fixture:
+            mock_use_case = json.load(fixture)
+
+        mock_api.get(
+            f"https://api.zindi.highwind.cloud/api/v1/use_cases/mine/{use_case_id}/",
+            json=mock_use_case,
+        )
+
+        client: Client = Client(
+            access_token="access-token-123",
+            access_token_expires_in=0,  # Expires in 0 means non-expiring
+            access_token_expires_at="2012-01-14T09:00:00",  # 1 hour ago (technically expired - but is a non-expiring token)
+            refresh_token="refresh-token-123",
+            refresh_token_expires_in=0,  # Expires in 0 means non-expiring
+            refresh_token_expires_at="2012-01-14T09:30:00",  # 30 minutes ago (technically expired - but is a non-expiring token)
+        )
+
+        with patch.object(client, "login", wraps=client.login) as login_spy:
+            with patch.object(
+                client, "_refresh_access_token", wraps=client._refresh_access_token
+            ) as refresh_token_spy:
+                client.get(f"use_cases/mine/{use_case_id}")
+
+        login_spy.assert_not_called()
+        refresh_token_spy.assert_not_called()
+
+    @freeze_time("2012-01-14 14:00:00", tz_offset=0)
+    def test_get_will_not_raise_an_exception_if_the_refresh_token_does_not_expire(
+        self, mock_api
+    ):
+        use_case_id: str = "d84258c7-b531-4ee8-8aca-639658c189c8"
+
+        with open("tests/fixtures/deployed_use_case.json") as fixture:
+            mock_use_case = json.load(fixture)
+
+        mock_api.get(
+            f"https://api.zindi.highwind.cloud/api/v1/use_cases/mine/{use_case_id}/",
+            json=mock_use_case,
+        )
+
+        client: Client = Client(
+            access_token="access-token-123",
+            access_token_expires_in=300,
+            access_token_expires_at="2012-01-14T13:50:00",  # 10 minutes ago (EXPIRED)
+            refresh_token="refresh-token-123",
+            refresh_token_expires_in=0,  # Expires in 0 means non-expiring
+            refresh_token_expires_at="2012-01-14T13:55:00",  # 5 minutes ago (technically expired - but is a non-expiring token)
+        )
+
+        with patch.object(client, "login", wraps=client.login) as login_spy:
+            with patch.object(
+                client, "_refresh_access_token", wraps=client._refresh_access_token
+            ) as refresh_token_spy:
+                client.get(f"use_cases/mine/{use_case_id}")
+
+        login_spy.assert_not_called()
+        refresh_token_spy.assert_called_once()
