@@ -46,3 +46,18 @@ class TestGradioApp(TestCase):
         assert client is not None
         assert isinstance(client, Client)
         assert client.access_token == mock_token
+
+    def test_setup_with_request_returns_a_unique_client_instance(
+        self,
+    ):
+        mock_token: str = "super-secret-token-123"
+
+        mock_session: MagicMock = MagicMock()
+        mock_session.get.return_value = mock_token
+        mock_gradio_request: MagicMock = MagicMock()
+        mock_gradio_request.session = mock_session
+
+        client_1 = GradioApp.setup_with_request(mock_gradio_request)
+        client_2 = GradioApp.setup_with_request(mock_gradio_request)
+
+        assert id(client_1) != id(client_2)
